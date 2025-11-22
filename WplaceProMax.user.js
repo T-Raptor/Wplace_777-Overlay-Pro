@@ -1140,7 +1140,7 @@ function injectStyles() {
       .op-ca-settings-popup input[type="range"] { margin-top: 4px; }
 
       .op-ca-list {
-        padding: 8px; overflow-y: auto; display: flex; flex-direction: column;
+        padding: 10px 12px; overflow-y: auto; display: flex; flex-direction: column;
         gap: 6px; flex-grow: 1; flex-shrink: 1; min-height: 0;
         transition: all 0.3s ease-in-out;
       }
@@ -1163,22 +1163,20 @@ function injectStyles() {
         display: flex; flex-direction: column; gap: 8px;
       }
       .op-ca-total-progress { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
-      .op-ca-main-actions { display: flex; gap: 8px; width: 100%; }
+      .op-ca-main-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; }
       .op-ca-main-actions .op-button { flex: 1; }
       .op-ca-filters-pane {
           max-height: 0;
           overflow: hidden;
           transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out, margin 0.3s ease-in-out;
-          padding: 0 4px; margin: 0;
-          border-top: 1px solid transparent;
+          padding: 10px 10px 0 10px;
+          margin: 0;
           display: flex; flex-direction: column; gap: 10px;
           flex-shrink: 0;
       }
       .op-ca-filters-pane.show {
           max-height: 500px;
-          margin-top: 10px;
-          padding-top: 10px;
-          border-top-color: var(--op-border);
+          padding: 10px 10px 12px 10px;
       }
       .op-ca-filter-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
       .op-ca-controls { display: flex; flex-direction: column; gap: 8px; }
@@ -1431,14 +1429,14 @@ panel.innerHTML = `
         </div>
         <div class="op-ca-main-actions">
             <button class="op-button" id="op-ca-apply-filter">Apply</button>
-            <button class="op-button" id="op-ca-toggle-filters">⚙️ Filters</button>
+            <button class="op-button" id="op-ca-toggle-filters">⚙️ Filters ▾</button>
         </div>
     </div>
     <div class="op-ca-filters-pane" id="op-ca-filters-pane">
         <div class="op-ca-filter-actions">
-            <button class="op-button" id="op-ca-mark-available">Select available</button>
             <button class="op-button" id="op-ca-mark-all">Select all</button>
-            <button class="op-button" id="op-ca-mark-none">Deselect</button>
+            <button class="op-button" id="op-ca-mark-available">Select available</button>
+            <button class="op-button" id="op-ca-mark-none">Deselect all</button>
             <button class="op-button" id="op-ca-show-all">Show all</button>
         </div>
         <div class="op-ca-controls">
@@ -2236,6 +2234,8 @@ function addEventListeners() {
         e.stopPropagation();
         config.caFiltersVisible = !config.caFiltersVisible;
         await saveConfig(['caFiltersVisible']);
+        const btn = $('op-ca-toggle-filters');
+        if (btn) btn.innerHTML = config.caFiltersVisible ? '⚙️ Filters ▴' : '⚙️ Filters ▾';
         updateUI();
     });
 
@@ -2713,6 +2713,9 @@ function updateUI() {
 
             const filtersPane = $('op-ca-filters-pane');
             if(filtersPane) filtersPane.classList.toggle('show', !!config.caFiltersVisible);
+
+            const filtersBtn = $('op-ca-toggle-filters');
+            if(filtersBtn) filtersBtn.innerHTML = config.caFiltersVisible ? '⚙️ Filters ▴' : '⚙️ Filters ▾';
 
             $('op-ca-show-names-toggle')?.classList.toggle('active', !!config.caShowColorNames);
             $('op-ca-show-progress-toggle')?.classList.toggle('active', !!config.caShowProgress);
