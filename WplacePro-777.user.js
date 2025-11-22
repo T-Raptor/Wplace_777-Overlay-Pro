@@ -1024,8 +1024,10 @@ function injectStyles() {
       input[type="range"]::-moz-range-thumb { height: 20px; width: 20px; background-color: ${accentColor}; border-radius: 50%; border: 2px solid var(--op-subtle); box-shadow: 0 0 5px ${accentColor}; }
 
       .op-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; border: 1px solid var(--op-border); padding: 6px; border-radius: 10px; background: var(--op-bg); }
-      .op-item { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px; border-radius: 8px; border: 1px solid var(--op-border); background: var(--op-subtle); }
+      .op-item { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px; border-radius: 8px; border: 1px solid var(--op-border); background: var(--op-subtle); cursor: grab; transition: all 0.2s ease; }
       .op-item.active { border-color: var(--op-accent); box-shadow: 0 0 0 1px var(--op-accent); background: var(--op-bg); }
+      .op-item.dragging { opacity: 0.5; cursor: grabbing; }
+      .op-item.drag-over { border-color: var(--op-accent); border-style: dashed; transform: translateY(-2px); }
       .op-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
 
       .op-muted { color: var(--op-muted); font-size: 12px; }
@@ -1587,15 +1589,19 @@ function rebuildOverlayListUI() {
 
   list.innerHTML = '';
 
-  for (const ov of config.overlays) {
+  for (let i = 0; i < config.overlays.length; i++) {
+    const ov = config.overlays[i];
     const item = document.createElement('div');
     const isActive = ov.id === config.activeOverlayId;
     item.className = 'op-item' + (isActive ? ' active' : '');
+    item.draggable = true;
+    item.dataset.overlayId = ov.id;
     const localTag = ov.isLocal ? ' (local)' : (!ov.imageBase64 ? ' (no image)' : '');
     const title = (ov.name || '(untitled)') + localTag;
 
     item.innerHTML = `
       <div class="op-row" style="width:100%;">
+        <span style="cursor: grab; user-select: none; margin-right: 4px;" title="Drag to reorder">⠿</span>
         <input type="radio" name="op-active" ${isActive ? 'checked' : ''} title="Set as active"/>
         <input type="checkbox" ${ov.enabled ? 'checked' : ''} title="Activate/Deactivate"/>
         <div class="op-item-name" title="${title}">${title}</div>
@@ -1603,7 +1609,7 @@ function rebuildOverlayListUI() {
       </div>
     `;
 
-    const [radio, checkbox, nameDiv, trashBtn] = item.querySelector('.op-row').children;
+    const [dragHandle, radio, checkbox, nameDiv, trashBtn] = item.querySelector('.op-row').children;
 
     const selectThisOverlay = async () => {
         if (config.activeOverlayId !== ov.id) {
@@ -1636,6 +1642,54 @@ function rebuildOverlayListUI() {
         await saveConfig(['overlays', 'activeOverlayId']);
         clearOverlayCache(); ensureHook(); updateUI();
       }
+    });
+
+    // Drag and drop event listeners
+    item.addEventListener('dragstart', (e) => {
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', ov.id);
+    });
+
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      document.querySelectorAll('.op-item').forEach(el => el.classList.remove('drag-over'));
+    });
+
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const dragging = list.querySelector('.dragging');
+      if (dragging && dragging !== item) {
+        item.classList.add('drag-over');
+      }
+    });
+
+    item.addEventListener('dragleave', () => {
+      item.classList.remove('drag-over');
+    });
+
+    item.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      
+      const draggedId = e.dataTransfer.getData('text/plain');
+      const droppedId = ov.id;
+      
+      if (draggedId === droppedId) return;
+      
+      const draggedIdx = config.overlays.findIndex(o => o.id === draggedId);
+      const droppedIdx = config.overlays.findIndex(o => o.id === droppedId);
+      
+      if (draggedIdx === -1 || droppedIdx === -1) return;
+      
+      // Reorder the array
+      const [removed] = config.overlays.splice(draggedIdx, 1);
+      config.overlays.splice(droppedIdx, 0, removed);
+      
+      await saveConfig(['overlays']);
+      rebuildOverlayListUI();
+      showToast('Overlay order updated');
     });
 
     list.appendChild(item);
