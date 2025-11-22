@@ -1415,6 +1415,7 @@ panel.innerHTML = `
     <div class="op-ca-header" id="op-ca-header-drag">
         <span>Color Progress</span>
         <div class="op-ca-settings-wrap">
+            <button class="op-ca-settings-btn" id="op-ca-refresh-btn" title="Refresh progress">🔄</button>
             <button class="op-ca-settings-btn" id="op-ca-highlight-btn" title="Highlight missing pixels">🎯</button>
             <button class="op-ca-settings-btn" id="op-ca-settings-btn" title="Progress Panel Settings">⚙️</button>
             <button class="op-ca-settings-btn" id="op-ca-toggle-collapse" title="Collapse/Expand" style="margin-left: 5px;">▾</button>
@@ -2213,6 +2214,15 @@ function addEventListeners() {
         caHighlightToggle.classList.toggle('active', config.caHighlightEnabled);
         await saveConfig(['caHighlightEnabled']);
         if (config.isColorPanelVisible) await updateOverlayProgress();
+    });
+
+    $('op-ca-refresh-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (config.isColorPanelVisible) {
+            clearOverlayCache();
+            await updateOverlayProgress();
+            showToast('Progress refreshed');
+        }
     });
 
     $('op-ca-toggle-collapse').addEventListener('click', (e) => {
