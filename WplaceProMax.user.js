@@ -182,15 +182,6 @@
 
     let lastKnownAvailableColors = new Set();
 
-    // ------------------------------- LIST OF DONORS ----------------------------------------
-
-const DONATORS = [
-{ name: "Nobody yet...", contribution: "0 USD   :(" },
-
-];
-
-    // ---------------------------- END OF DONOR LIST ---------------------------------------
-
   function uid() { return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`; }
       function debounce(func, wait) {
       let timeout;
@@ -1208,73 +1199,6 @@ function injectStyles() {
         border-color: var(--op-accent);
         box-shadow: 0 0 8px color-mix(in srgb, var(--op-accent) 50%, transparent);
       }
-      .op-donation-section {
-        margin-top: 15px;
-        padding-top: 10px;
-        border-top: 1px solid var(--op-border);
-        text-align: center;
-        font-size: 12px;
-        color: var(--op-muted);
-      }
-      .op-donation-section p {
-        margin: 0 0 8px 0;
-      }
-      .op-donation-info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 4px 8px;
-        background: var(--op-subtle);
-        border-radius: 6px;
-        margin-top: 4px;
-      }
-      .op-donation-info code {
-        font-family: monospace;
-        font-weight: bold;
-        color: var(--op-text);
-        user-select: all;
-        background: var(--op-bg);
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-      .op-show-donators {
-        width: 100%;
-        margin-top: 10px;
-      }
-      .op-donators-list-wrap {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease-in-out;
-      }
-      .op-donators-list-wrap.show {
-        max-height: 150px; /* Altura máxima para la lista */
-      }
-      .op-donators-list {
-        list-style: none;
-        padding: 8px 0 0 0;
-        margin: 0;
-        max-height: 140px;
-        overflow-y: auto;
-        border-top: 1px solid var(--op-border);
-        margin-top: 8px;
-      }
-      .op-donator-item, .op-donator-item-empty {
-        display: flex;
-        justify-content: space-between;
-        padding: 5px 8px;
-        border-radius: 4px;
-      }
-      .op-donator-item:nth-child(odd) {
-        background: var(--op-subtle);
-      }
-      .op-donator-item-empty {
-        justify-content: center;
-        font-style: italic;
-      }
-      .op-donator-contribution {
-        font-weight: bold;
-        color: var(--op-accent);
-      }
       @media (max-width: 480px) {
        #op-color-analysis-panel {
        width: 90vw;
@@ -1551,19 +1475,6 @@ panel.innerHTML = `
         <hr style="border-color: var(--op-border); margin: 12px 0;">
         <label>Panel Transparency</label>
         <input type="range" id="op-ca-alpha-slider" min="0.2" max="1" step="0.05">
-        <div class="op-donation-section">
-            <p>This project is free, but I would appreciate a donation to support the project. ❤️</p>
-            <div class="op-donation-info">
-                <span>Binance ID:</span>
-                <code>851390091</code>
-            </div>
-            <div class="op-donation-info">
-                <span>PayPal:</span>
-                <code>@srcratier</code>
-            </div>
-        </div>
-         <button class="op-button op-show-donators">❤️ See Acknowledgments</button>
-         <div class="op-donators-list-wrap"></div>
     `;
     document.body.appendChild(caSettingsModal);
 
@@ -2300,31 +2211,6 @@ function addEventListeners() {
         caHighlightToggle.classList.toggle('active', config.caHighlightEnabled);
         await saveConfig(['caHighlightEnabled']);
         if (config.isColorPanelVisible) await updateOverlayProgress();
-    });
-    document.querySelectorAll('.op-show-donators').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const parentModal = button.closest('.op-modal');
-            const listWrap = parentModal.querySelector('.op-donators-list-wrap');
-            if (!listWrap) return;
-
-            if (listWrap.classList.contains('show')) {
-                listWrap.classList.remove('show');
-                listWrap.innerHTML = '';
-            } else {
-                let listHTML = '<ul class="op-donators-list">';
-                if (DONATORS.length === 0) {
-                    listHTML += '<li class="op-donator-item-empty">There are no donations yet. Be the first!</li>';
-                } else {
-                    DONATORS.forEach(d => {
-                        listHTML += `<li class="op-donator-item"><span class="op-donator-name">${d.name}</span><span class="op-donator-contribution">${d.contribution}</span></li>`;
-                    });
-                }
-                listHTML += '</ul>';
-                listWrap.innerHTML = listHTML;
-                listWrap.classList.add('show');
-            }
-        });
     });
 
     $('op-ca-toggle-collapse').addEventListener('click', (e) => {
