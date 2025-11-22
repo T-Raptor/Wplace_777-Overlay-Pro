@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wplace Overlay Pro Max
 // @namespace    http://tampermonkey.net/
-// @version      4.9.4
+// @version      4.9.5
 // @description  Overlays tiles on wplace.live. Can also resize, and color-match your overlay to wplace's palette. Make sure to comply with the site's Terms of Service, and rules! This script is not affiliated with Wplace.live in any way, use at your own risk. This script is not affiliated with TamperMonkey. The author of this userscript is not responsible for any damages, issues, loss of data, or punishment that may occur as a result of using this script. This script is provided "as is" under GPLv3.
 // @author       shinkonet → @SrCratier → Lamechial → T-Raptor
 // @updateURL    https://github.com/T-Raptor/Wplace_Overlay_Pro_Max/raw/refs/heads/main/WplaceProMax.user.js
@@ -2262,7 +2262,7 @@ function addEventListeners() {
 
         const refreshWhenReady = (retries = 5) => {
             if (retries <= 0) {
-                showToast('Error: Unable to find the game canvas.', 3000);
+                console.log('[Overlay Pro] Unable to find game canvas for highlight refresh.');
                 return;
             }
             const canvasContainer = document.querySelector('.canvas-container');
